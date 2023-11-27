@@ -3,20 +3,14 @@ TODO: You can either work from this skeleton, or you can build on your solution 
 """
 
 # list of valid command names
-valid_commands = ['off', 'help', 'replay', 'forward', 'back', 'right', 'left', 'sprint']
+from world.text import world as text_world
+
+
+valid_commands = ['off', 'help', 'replay',
+                  'forward', 'back', 'right', 'left', 'sprint']
 move_commands = valid_commands[3:]
 
-# variables tracking position and direction
-position_x = 0
-position_y = 0
-directions = ['forward', 'right', 'back', 'left']
-current_direction_index = 0
-
-# area limit vars
-min_y, max_y = -200, 200
-min_x, max_x = -100, 100
-
-#commands history
+# commands history
 history = []
 
 
@@ -77,10 +71,10 @@ def valid_command(command):
     if command_name.lower() == 'replay':
         if len(arg1.strip()) == 0:
             return True
-        elif (arg1.lower().find('silent') > -1 or arg1.lower().find('reversed') > -1) and len(arg1.lower().replace('silent', '').replace('reversed','').strip()) == 0:
+        elif (arg1.lower().find('silent') > -1 or arg1.lower().find('reversed') > -1) and len(arg1.lower().replace('silent', '').replace('reversed', '').strip()) == 0:
             return True
         else:
-            range_args = arg1.replace('silent', '').replace('reversed','')
+            range_args = arg1.replace('silent', '').replace('reversed', '')
             if is_int(range_args):
                 return True
             else:
@@ -111,47 +105,7 @@ REPLAY - replays all movement commands from history [FORWARD, BACK, RIGHT, LEFT,
 """
 
 
-def show_position(robot_name):
-    print(' > '+robot_name+' now at position ('+str(position_x)+','+str(position_y)+').')
-
-
-def is_position_allowed(new_x, new_y):
-    """
-    Checks if the new position will still fall within the max area limit
-    :param new_x: the new/proposed x position
-    :param new_y: the new/proposed y position
-    :return: True if allowed, i.e. it falls in the allowed area, else False
-    """
-
-    return min_x <= new_x <= max_x and min_y <= new_y <= max_y
-
-
-def update_position(steps):
-    """
-    Update the current x and y positions given the current direction, and specific nr of steps
-    :param steps:
-    :return: True if the position was updated, else False
-    """
-
-    global position_x, position_y
-    new_x = position_x
-    new_y = position_y
-
-    if directions[current_direction_index] == 'forward':
-        new_y = new_y + steps
-    elif directions[current_direction_index] == 'right':
-        new_x = new_x + steps
-    elif directions[current_direction_index] == 'back':
-        new_y = new_y - steps
-    elif directions[current_direction_index] == 'left':
-        new_x = new_x - steps
-
-    if is_position_allowed(new_x, new_y):
-        position_x = new_x
-        position_y = new_y
-        return True
-    return False
-
+# code cut heare...
 
 def do_forward(robot_name, steps):
     """
@@ -160,7 +114,7 @@ def do_forward(robot_name, steps):
     :param steps:
     :return: (True, forward output text)
     """
-    if update_position(steps):
+    if text_world.update_position(steps):
         return True, ' > '+robot_name+' moved forward by '+str(steps)+' steps.'
     else:
         return True, ''+robot_name+': Sorry, I cannot go outside my safe zone.'
@@ -174,7 +128,7 @@ def do_back(robot_name, steps):
     :return: (True, forward output text)
     """
 
-    if update_position(-steps):
+    if text_world.update_position(-steps):
         return True, ' > '+robot_name+' moved back by '+str(steps)+' steps.'
     else:
         return True, ''+robot_name+': Sorry, I cannot go outside my safe zone.'
@@ -235,12 +189,15 @@ def get_commands_history(reverse, relativeStart, relativeEnd):
     :return: return list of (command_name, arguments) tuples
     """
 
-    commands_to_replay = [(name, args) for (name, args) in list(map(lambda command: split_command_input(command), history)) if name in move_commands]
+    commands_to_replay = [(name, args) for (name, args) in list(map(
+        lambda command: split_command_input(command), history)) if name in move_commands]
     if reverse:
         commands_to_replay.reverse()
 
-    range_start = len(commands_to_replay) + relativeStart if (relativeStart is not None and (len(commands_to_replay) + relativeStart) >= 0) else 0
-    range_end = len(commands_to_replay) + relativeEnd if  (relativeEnd is not None and (len(commands_to_replay) + relativeEnd) >= 0 and relativeEnd > relativeStart) else len(commands_to_replay)
+    range_start = len(commands_to_replay) + relativeStart if (
+        relativeStart is not None and (len(commands_to_replay) + relativeStart) >= 0) else 0
+    range_end = len(commands_to_replay) + relativeEnd if (relativeEnd is not None and (len(
+        commands_to_replay) + relativeEnd) >= 0 and relativeEnd > relativeStart) else len(commands_to_replay)
     return commands_to_replay[range_start:range_end]
 
 
@@ -270,10 +227,11 @@ def do_replay(robot_name, arguments):
     commands_to_replay = get_commands_history(reverse, range_start, range_end)
 
     for (command_name, command_arg) in commands_to_replay:
-        (do_next, command_output) = call_command(command_name, command_arg, robot_name)
+        (do_next, command_output) = call_command(
+            command_name, command_arg, robot_name)
         if not silent:
             print(command_output)
-            show_position(robot_name)
+            text_world.show_position(robot_name)
 
     return True, ' > '+robot_name+' replayed ' + str(len(commands_to_replay)) + ' commands' + (' in reverse' if reverse else '') + (' silently.' if silent else '.')
 
@@ -312,7 +270,7 @@ def handle_command(robot_name, command):
         (do_next, command_output) = call_command(command_name, arg, robot_name)
 
     print(command_output)
-    show_position(robot_name)
+    text_world.show_position(robot_name)
     add_to_history(command)
 
     return do_next
