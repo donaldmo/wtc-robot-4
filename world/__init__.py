@@ -1,1 +1,0 @@
-print('[Package] world loaded successfuly.')
