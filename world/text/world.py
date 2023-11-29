@@ -1,9 +1,3 @@
-from __init__ import using_turtle
-
-use_turtle = using_turtle()
-
-def init_turtle():
-    return use_turtle
 
 # variables tracking position and direction
 position_x = 0
@@ -14,6 +8,7 @@ current_direction_index = 0
 # area limit vars
 min_y, max_y = -200, 200
 min_x, max_x = -100, 100
+
 
 def show_position(robot_name):
     print(' > '+robot_name+' now at position ('+str(position_x)+','+str(position_y)+').')
@@ -106,7 +101,6 @@ def do_back(robot_name, steps):
     :param steps:
     :return: (True, forward output text)
     """
-
     if update_position(-steps):
         return True, ' > '+robot_name+' moved back by '+str(steps)+' steps.'
     else:

@@ -6,17 +6,14 @@ TODO: You can either work from this skeleton, or you can build on your solution 
 import sys
 import world.text.world as text_world
 import world.turtle.world as turtle_world
-from world.use_turtle import use_turtle
 
+is_turtle = False
 
 valid_commands = ['off', 'help', 'replay', 'forward', 'back', 'right', 'left', 'sprint']
 move_commands = valid_commands[3:]
 
 #commands history
 history = []
-is_turtle = False
-using_turtle = None
-
 
 def get_robot_name():
     name = input("What do you want to name your robot? ")
@@ -158,26 +155,49 @@ def do_replay(robot_name, arguments):
         (do_next, command_output) = call_command(command_name, command_arg, robot_name)
         if not silent:
             print(command_output)
-            text_world.show_position(robot_name)
+            if is_turtle:
+                turtle_world.show_position(robot_name)
+            else:
+                text_world.show_position(robot_name)
 
     return True, ' > '+robot_name+' replayed ' + str(len(commands_to_replay)) + ' commands' + (' in reverse' if reverse else '') + (' silently.' if silent else '.')
 
 
 def call_command(command_name, command_arg, robot_name):
+    do_next = False
+    output = None
+    
     if command_name == 'help':
         return do_help()
     elif command_name == 'forward':
+        if is_turtle:
+            return turtle_world.do_forward(robot_name, int(command_arg))
         return text_world.do_forward(robot_name, int(command_arg))
+    
     elif command_name == 'back':
+        if is_turtle:
+            return turtle_world.do_back(robot_name, int(command_arg))
         return text_world.do_back(robot_name, int(command_arg))
+    
     elif command_name == 'right':
+        if is_turtle:
+            return turtle_world.do_right_turn(robot_name)
         return text_world.do_right_turn(robot_name)
+    
     elif command_name == 'left':
+        if is_turtle:
+            return turtle_world.do_left_turn(robot_name)
         return text_world.do_left_turn(robot_name)
+    
     elif command_name == 'sprint':
+        if is_turtle:
+            return turtle_world.do_sprint(robot_name, int(command_arg))    
         return text_world.do_sprint(robot_name, int(command_arg))
+    
     elif command_name == 'replay':
-        return do_replay(robot_name, command_arg)
+        if is_turtle:
+            return turtle_world.do_replay(robot_name, command_arg)
+        return text_world.do_replay(robot_name, command_arg)
     return False, None
 
 
@@ -233,6 +253,10 @@ def robot_start():
 
 
 if __name__ == "__main__":
-    text_world.init_turtle()
-    
+    args = sys.argv
+    is_turtle = 'turtle' in args
+
+    if is_turtle:
+        turtle_world.use_turtle()
+
     robot_start()
