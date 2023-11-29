@@ -9,7 +9,7 @@ def download_image(url, filename):
         out_file.write(response.read())
 
 # Download the image
-image_url = "https://cdna.artstation.com/p/assets/images/images/008/995/196/large/shane-smith-tortoise-character-illustration.jpg?1516554270"
+image_url = "https://cdna.artstation.com/p/assets/images/images/008/995/196/large/shane-smith-tortoise-character-illustration.jpg"
 image_filename = "tortoise_image.jpg"
 download_image(image_url, image_filename)
 
@@ -86,10 +86,3 @@ while True:
 
         distance = int(args[1])
         turtle_robot.forward(distance)
-
-        # Update the progress display after each movement
-        progress_percent = (turtle_robot.distance(0, 0) / 480) * 100  # Adjust as needed based on your constraints
-        update_progress(int(progress_percent))
-        
-        # Introduce a 2-second timeout
-        time.sleep(2)
