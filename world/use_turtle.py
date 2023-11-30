@@ -17,6 +17,7 @@ def use_turtle():
     constrained_turtle.forward(100)
     constrained_turtle.pendown()
     constrained_turtle.pencolor('red')
+    constrained_turtle.pensize(3)
 
     for i in range(2):
         constrained_turtle.right(90)

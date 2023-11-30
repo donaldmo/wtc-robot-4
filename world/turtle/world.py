@@ -1,7 +1,7 @@
 
 # variables tracking position and direction
-import turtle
-turtle_robot = None
+from world.use_turtle import use_turtle
+
 
 position_x = 0
 position_y = 0
@@ -12,32 +12,11 @@ current_direction_index = 0
 min_y, max_y = -200, 200
 min_x, max_x = -100, 100
 
-def use_turtle():
-    global turtle_robot
-    screen = turtle.getscreen()
-    screen.setup(width=480, height=768)
+def get_turtle():
+    this = use_turtle()
+    return this
 
-    turtle_robot = turtle.Turtle()
-    turtle_robot.shape('turtle')
-    turtle_robot.setheading(90)
-
-    constrained_turtle = turtle.Turtle()
-    constrained_turtle.hideturtle()
-    constrained_turtle.penup()
-    constrained_turtle.setheading(90)
-    constrained_turtle.forward(200)
-    constrained_turtle.right(90)
-    constrained_turtle.forward(100)
-    constrained_turtle.pendown()
-    constrained_turtle.pencolor('red')
-
-    for i in range(2):
-        constrained_turtle.right(90)
-        constrained_turtle.forward(400)
-        constrained_turtle.right(90)
-        constrained_turtle.forward(200)
-
-    return turtle_robot
+use_turtle()
 
 def show_position(robot_name):
     print(' > '+robot_name+' now at position ('+str(position_x)+','+str(position_y)+').')
@@ -54,7 +33,7 @@ def is_position_allowed(new_x, new_y):
     return min_x <= new_x <= max_x and min_y <= new_y <= max_y
 
 
-def update_position(steps):
+def update_position(steps, current_direction_index):
     """
     Update the current x and y positions given the current direction, and specific nr of steps
     :param steps:
@@ -75,68 +54,8 @@ def update_position(steps):
         new_x = new_x - steps
 
     if is_position_allowed(new_x, new_y):
+        use_turtle().goto(new_x,new_y)
         position_x = new_x
         position_y = new_y
         return True
     return False
-
-
-def do_right_turn(robot_name):
-    """
-    Do a 90 degree turn to the right
-    :param robot_name:
-    :return: (True, right turn output text)
-    """
-    global current_direction_index
-
-    current_direction_index += 1
-    if current_direction_index > 3:
-        current_direction_index = 0
-
-    turtle_robot.right(90)
-    return True, ' > '+robot_name+' turned right.'
-
-
-def do_left_turn(robot_name):
-    """
-    Do a 90 degree turn to the left
-    :param robot_name:
-    :return: (True, left turn output text)
-    """
-    global current_direction_index
-
-    current_direction_index -= 1
-    if current_direction_index < 0:
-        current_direction_index = 3
-
-    turtle_robot.left(90)
-    return True, ' > '+robot_name+' turned left.'
-
-def do_forward(robot_name, steps):
-    """
-    Moves the robot forward the number of steps
-    :param robot_name:
-    :param steps:
-    :return: (True, forward output text)
-    """
-    if update_position(steps):
-        turtle_robot.forward(steps)
-        return True, ' > '+robot_name+' moved forward by '+str(steps)+' steps.'
-    else:
-        return True, ''+robot_name+': Sorry, I cannot go outside my safe zone.'
-
-
-def do_back(robot_name, steps):
-    """
-    Moves the robot forward the number of steps
-    :param robot_name:
-    :param steps:
-    :return: (True, forward output text)
-    """
-    if update_position(-steps):
-        turtle_robot.back(steps)
-        return True, ' > '+robot_name+' moved back by '+str(steps)+' steps.'
-    else:
-        return True, ''+robot_name+': Sorry, I cannot go outside my safe zone.'
-
-

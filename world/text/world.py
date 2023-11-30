@@ -25,7 +25,7 @@ def is_position_allowed(new_x, new_y):
     return min_x <= new_x <= max_x and min_y <= new_y <= max_y
 
 
-def update_position(steps):
+def update_position(steps, current_direction_index):
     """
     Update the current x and y positions given the current direction, and specific nr of steps
     :param steps:

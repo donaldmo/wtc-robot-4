@@ -4,13 +4,37 @@ TODO: You can either work from this skeleton, or you can build on your solution 
 
 # list of valid command names
 import sys
-import world.text.world as text_world
-import world.turtle.world as turtle_world
+import world.obstacles as obs
+
+if len(sys.argv) > 1:
+    if sys.argv[1] == "turtle":
+        import world.turtle.world as world
+
+    else:
+        import world.text.world as world
+else:
+    import world.text.world as world
+# import world.text.world as text_world
+# import world.turtle.world as turtle_world
+
+# world = None
+
+# def init_world(is_turtle):
+#     global world
+
+#     if is_turtle:
+#         world = turtle_world
+#     else:
+#         world = text_world
+
+#     return world
 
 is_turtle = False
+my_turtle = None
 
 valid_commands = ['off', 'help', 'replay', 'forward', 'back', 'right', 'left', 'sprint']
 move_commands = valid_commands[3:]
+current_direction_index = 0
 
 #commands history
 history = []
@@ -127,7 +151,7 @@ def get_commands_history(reverse, relativeStart, relativeEnd):
 
 
 
-def do_right_turn(robot_name):
+def do_right_turn(robot_name, ):
     """
     Do a 90 degree turn to the right
     :param robot_name:
@@ -163,7 +187,7 @@ def do_forward(robot_name, steps):
     :param steps:
     :return: (True, forward output text)
     """
-    if update_position(steps):
+    if world.update_position(steps, current_direction_index):
         return True, ' > '+robot_name+' moved forward by '+str(steps)+' steps.'
     else:
         return True, ''+robot_name+': Sorry, I cannot go outside my safe zone.'
@@ -176,7 +200,7 @@ def do_back(robot_name, steps):
     :param steps:
     :return: (True, forward output text)
     """
-    if update_position(-steps):
+    if world.update_position(-steps, current_direction_index):
         return True, ' > '+robot_name+' moved back by '+str(steps)+' steps.'
     else:
         return True, ''+robot_name+': Sorry, I cannot go outside my safe zone.'
@@ -226,10 +250,8 @@ def do_replay(robot_name, arguments):
         (do_next, command_output) = call_command(command_name, command_arg, robot_name)
         if not silent:
             print(command_output)
-            if is_turtle:
-                turtle_world.show_position(robot_name)
-            else:
-                text_world.show_position(robot_name)
+
+            world.show_position(robot_name)
 
     return True, ' > '+robot_name+' replayed ' + str(len(commands_to_replay)) + ' commands' + (' in reverse' if reverse else '') + (' silently.' if silent else '.')
 
@@ -241,34 +263,22 @@ def call_command(command_name, command_arg, robot_name):
     if command_name == 'help':
         return do_help()
     elif command_name == 'forward':
-        if is_turtle:
-            return turtle_world.do_forward(robot_name, int(command_arg))
-        return text_world.do_forward(robot_name, int(command_arg))
+        return do_forward(robot_name, int(command_arg))
     
     elif command_name == 'back':
-        if is_turtle:
-            return turtle_world.do_back(robot_name, int(command_arg))
-        return text_world.do_back(robot_name, int(command_arg))
+        return do_back(robot_name, int(command_arg))
     
     elif command_name == 'right':
-        if is_turtle:
-            return turtle_world.do_right_turn(robot_name)
-        return text_world.do_right_turn(robot_name)
+        return do_right_turn(robot_name)
     
     elif command_name == 'left':
-        if is_turtle:
-            return turtle_world.do_left_turn(robot_name)
-        return text_world.do_left_turn(robot_name)
+        return do_left_turn(robot_name)
     
-    elif command_name == 'sprint':
-        if is_turtle:
-            return turtle_world.do_sprint(robot_name, int(command_arg))    
-        return text_world.do_sprint(robot_name, int(command_arg))
+    elif command_name == 'sprint':  
+        return do_sprint(robot_name, int(command_arg))
     
     elif command_name == 'replay':
-        if is_turtle:
-            return turtle_world.do_replay(robot_name, command_arg)
-        return text_world.do_replay(robot_name, command_arg)
+        return do_replay(robot_name, command_arg)
     return False, None
 
 
@@ -288,7 +298,8 @@ def handle_command(robot_name, command):
         (do_next, command_output) = call_command(command_name, arg, robot_name)
 
     print(command_output)
-    text_world.show_position(robot_name)
+
+    world.show_position(robot_name)
     add_to_history(command)
 
     return do_next
@@ -311,10 +322,13 @@ def robot_start():
     robot_name = get_robot_name()
     output(robot_name, "Hello kiddo!")
 
-    position_x = 0
-    position_y = 0
-    current_direction_index = 0
-    history = []
+    obss = obs.get_obstacles()
+
+    if obss == [] or (0,0) not in obss:
+        print("There are some obstacles:")
+        for i in obss:
+            print(f"- At position {i[0]},{i[1]} (to {i[0]+4},{i[1]+4})")
+
 
     command = get_command(robot_name)
     while handle_command(robot_name, command):
@@ -323,11 +337,19 @@ def robot_start():
     output(robot_name, "Shutting down..")
 
 
-if __name__ == "__main__":
-    args = sys.argv
-    is_turtle = 'turtle' in args
+    world.position_x = 0
+    world.position_y = 0
+    current_direction_index = 0
+    history = []
 
-    if is_turtle:
-        turtle_world.use_turtle()
+
+if __name__ == "__main__":
+    # args = sys.argv
+    # is_turtle = 'turtle' in args
+    # is_text = 'text' in args
+
+    # if is_turtle and not is_text:
+    #     my_turtle =  world.get_turtle()
+        # obs = obstacles.get_obstacles()
 
     robot_start()
